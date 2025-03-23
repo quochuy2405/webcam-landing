@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "Webcam Landing Analyzer",
-	description: "Webcam Landing Analyzer",
+	title: "Webcam Soli Analyzer",
+	description: "Webcam Soli Analyzer",
 };
 
 export default function RootLayout({
