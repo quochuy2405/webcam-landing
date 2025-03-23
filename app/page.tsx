@@ -71,12 +71,12 @@ export default function Home() {
 
 			// Basic soil color classification
 			if (value < 3) {
-				soilType = "Đất rất tối (Very Dark)";
+				soilType = "Đất đen (Very Dark)";
 			} else if (value < 5) {
 				if (avgR > avgG && avgR > avgB && chroma > 20) {
-					soilType = "Đất nâu đỏ (Dark Reddish Brown)";
+					soilType = "Đất đen (Dark Reddish Brown)";
 				} else {
-					soilType = "Đất tối (Dark)";
+					soilType = "Đất đen (Dark)";
 				}
 			} else if (value < 7) {
 				if (avgR > avgG + 20 && avgR > avgB + 20) {
