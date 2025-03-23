@@ -7,58 +7,103 @@ export default function Home() {
 	const webcamRef = useRef<any>(null);
 	const canvasRef = useRef<any>(null);
 	const [isWebcamOn, setIsWebcamOn] = useState(false);
-	const [capturedImage, setCapturedImage] = useState(null);
+	const [capturedImage, setCapturedImage] = useState<any>(null);
 	const [colorResult, setColorResult] = useState("");
+	const [rgbValues, setRgbValues] = useState<any>(null);
 
-	// Bật/tắt webcam
+	// Toggle webcam
 	const toggleWebcam = () => {
 		setIsWebcamOn((prev) => !prev);
 		setCapturedImage(null);
 		setColorResult("");
+		setRgbValues(null);
 	};
 
-	// Chụp ảnh từ webcam
+	// Capture image from webcam
 	const capture = useCallback(() => {
 		if (!webcamRef.current) return;
-		const imageSrc = webcamRef.current?.getScreenshot();
+		const imageSrc = webcamRef.current.getScreenshot();
 		setCapturedImage(imageSrc);
 		analyzeColor(imageSrc);
-	}, [webcamRef]);
+	}, []);
 
-	// Phân tích màu từ ảnh
+	// Analyze color from image
 	const analyzeColor = (imageSrc: string) => {
 		const img = new Image();
 		img.src = imageSrc;
 		img.onload = () => {
-			const canvas = canvasRef.current as any;
+			const canvas = canvasRef.current;
 			const ctx = canvas.getContext("2d");
 			canvas.width = img.width;
 			canvas.height = img.height;
 			ctx.drawImage(img, 0, 0);
 
-			// Lấy dữ liệu điểm ảnh từ giữa ảnh
-			const pixelData = ctx.getImageData(img.width / 2, img.height / 2, 1, 1).data;
-			const [r, g, b] = pixelData;
+			// Sample from center 1/3 of image
+			const width = img.width;
+			const height = img.height;
+			const startX = width / 3;
+			const startY = height / 3;
+			const sampleWidth = width / 3;
+			const sampleHeight = height / 3;
 
-			// Phân loại màu dựa trên giá trị RGB
-			let detectedColor = "Không xác định";
-			if (r < 50 && g < 50 && b < 50) {
-				detectedColor = "Đen";
-			} else if (r > 200 && g < 100 && b < 100) {
-				detectedColor = "Đỏ";
-			} else if (r > 200 && g > 150 && b < 100) {
-				detectedColor = "Cát";
+			const pixelData = ctx.getImageData(startX, startY, sampleWidth, sampleHeight).data;
+			const pixelCount = sampleWidth * sampleHeight;
+
+			// Calculate average RGB
+			let totalR = 0,
+				totalG = 0,
+				totalB = 0;
+			for (let i = 0; i < pixelData.length; i += 4) {
+				totalR += pixelData[i];
+				totalG += pixelData[i + 1];
+				totalB += pixelData[i + 2];
 			}
 
-			setColorResult(detectedColor);
+			const avgR = Math.round(totalR / pixelCount);
+			const avgG = Math.round(totalG / pixelCount);
+			const avgB = Math.round(totalB / pixelCount);
+			setRgbValues({ r: avgR, g: avgG, b: avgB });
+
+			// Improved soil color classification based on USDA guidelines
+			let soilType = "Không xác định";
+			const value = Math.max(avgR, avgG, avgB) / 25.5; // Rough value (lightness) approximation
+			const chroma = Math.sqrt(Math.pow(avgR - avgG, 2) + Math.pow(avgG - avgB, 2)); // Simplified chroma
+
+			// Basic soil color classification
+			if (value < 3) {
+				soilType = "Đất rất tối (Very Dark)";
+			} else if (value < 5) {
+				if (avgR > avgG && avgR > avgB && chroma > 20) {
+					soilType = "Đất nâu đỏ (Dark Reddish Brown)";
+				} else {
+					soilType = "Đất tối (Dark)";
+				}
+			} else if (value < 7) {
+				if (avgR > avgG + 20 && avgR > avgB + 20) {
+					soilType = "Đất đỏ nhạt (Reddish Brown)";
+				} else if (avgG > avgR && avgG > avgB) {
+					soilType = "Đất xám xanh (Grayish Green)";
+				} else {
+					soilType = "Đất nâu (Brown)";
+				}
+			} else {
+				if (avgR > 200 && avgG > 200 && avgB > 200) {
+					soilType = "Đất sáng (Light)";
+				} else if (avgR > avgG + 30 && avgR > avgB + 30) {
+					soilType = "Đất cát đỏ (Reddish Sand)";
+				} else {
+					soilType = "Đất cát nhạt (Light Sand)";
+				}
+			}
+
+			setColorResult(soilType);
 		};
 	};
 
 	return (
 		<div className='flex h-screen p-5 gap-5 bg-gray-100'>
-			{/* Phần 1: Webcam và điều khiển */}
 			<div className='flex-1 flex flex-col items-center justify-start'>
-				<h1 className='text-3xl font-bold mb-5 text-gray-800'>Webcam Landing Analyzer</h1>
+				<h1 className='text-3xl font-bold mb-5 text-gray-800'>Phân tích màu đất qua Webcam</h1>
 				{isWebcamOn ? (
 					<>
 						<Webcam
@@ -66,6 +111,11 @@ export default function Home() {
 							ref={webcamRef}
 							screenshotFormat='image/jpeg'
 							className='w-full max-w-[640px] h-auto border-2 border-gray-700 rounded-lg'
+							videoConstraints={{
+								width: 1280,
+								height: 720,
+								facingMode: "environment",
+							}}
 						/>
 						<div className='mt-5 flex gap-3'>
 							<button
@@ -89,7 +139,6 @@ export default function Home() {
 				)}
 			</div>
 
-			{/* Phần 2: Hiển thị kết quả */}
 			<div className='flex-1 flex flex-col items-center justify-start'>
 				<h2 className='text-2xl font-semibold mb-5 text-gray-800'>Kết quả</h2>
 				{capturedImage ? (
@@ -100,13 +149,17 @@ export default function Home() {
 							className='w-full max-w-[640px] h-auto border-2 border-gray-700 rounded-lg mb-5'
 						/>
 						<p className='text-lg'>
-							Màu nhận diện đất: <span className='font-bold text-blue-600'>{colorResult}</span>
+							Loại đất: <span className='font-bold text-blue-600'>{colorResult}</span>
 						</p>
+						{rgbValues && (
+							<p className='text-lg'>
+								Giá trị RGB: ({rgbValues.r}, {rgbValues.g}, {rgbValues.b})
+							</p>
+						)}
 					</div>
 				) : (
 					<p className='text-gray-600'>Chưa có ảnh để phân tích.</p>
 				)}
-				{/* Canvas ẩn để phân tích */}
 				<canvas ref={canvasRef} className='hidden' />
 			</div>
 		</div>
