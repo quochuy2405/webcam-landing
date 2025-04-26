@@ -38,7 +38,7 @@ export default function Home() {
 			canvas.height = img.height;
 			ctx.drawImage(img, 0, 0);
 
-			// Sample from center 1/3 of image
+			// Sample from center 1/3 of the image
 			const width = img.width;
 			const height = img.height;
 			const startX = width / 3;
@@ -64,41 +64,42 @@ export default function Home() {
 			const avgB = Math.round(totalB / pixelCount);
 			setRgbValues({ r: avgR, g: avgG, b: avgB });
 
-			// Improved soil color classification based on USDA guidelines
+			// Improved soil color classification
 			let soilType = "Không xác định";
-			const value = Math.max(avgR, avgG, avgB) / 25.5; // Rough value (lightness) approximation
-			const chroma = Math.sqrt(Math.pow(avgR - avgG, 2) + Math.pow(avgG - avgB, 2)); // Simplified chroma
 
-			// Basic soil color classification
-			if (value < 3) {
-				soilType = "Đất đen (Very Dark)";
-			} else if (value < 5) {
-				if (avgR > avgG && avgR > avgB && chroma > 20) {
-					soilType = "Đất đen (Dark Reddish Brown)";
+			// Calculate value (lightness) and chroma
+			const value = Math.max(avgR, avgG, avgB) / 2.55; // Normalized to 0-100 scale
+			const chroma = Math.sqrt((avgR - avgG) ** 2 + (avgG - avgB) ** 2);
+
+			// Soil color classification
+			if (value < 30) {
+				soilType = "Đất đen";
+			} else if (value < 50) {
+				if (avgR > avgG && avgR > avgB) {
+					soilType = chroma > 20 ? "Đất đỏ nâu" : "Đất đen xám";
 				} else {
-					soilType = "Đất đen (Dark)";
+					soilType = "Đất đen";
 				}
-			} else if (value < 7) {
-				if (avgR > avgG + 20 && avgR > avgB + 20) {
-					soilType = "Đất đỏ nhạt (Reddish Brown)";
+			} else if (value < 70) {
+				if (avgR > avgG && avgR > avgB) {
+					soilType = "Đất đỏ";
 				} else if (avgG > avgR && avgG > avgB) {
-					soilType = "Đất xám xanh (Grayish Green)";
+					soilType = "Đất vàng";
 				} else {
-					soilType = "Đất nâu (Brown)";
+					soilType = "Đất cát";
 				}
 			} else {
 				if (avgR > 200 && avgG > 200 && avgB > 200) {
-					soilType = "Đất sáng (Light)";
-				} else if (avgR > avgG + 30 && avgR > avgB + 30) {
-					soilType = "Đất cát đỏ (Reddish Sand)";
+					soilType = "Đất cát";
 				} else {
-					soilType = "Đất cát nhạt (Light Sand)";
+					soilType = "Đất cát";
 				}
 			}
 
 			setColorResult(soilType);
 		};
 	};
+
 
 	return (
 		<div className='flex h-screen p-5 gap-5 bg-gray-100'>
