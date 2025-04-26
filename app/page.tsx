@@ -102,16 +102,18 @@ export default function Home() {
 
 
 	return (
-		<div className='flex h-screen p-5 gap-5 bg-gray-100'>
+		<div className='flex h-screen p-5 gap-5 bg-gradient-to-br from-[#1E3A8A] via-[#9333EA] to-[#FF5F6D] text-white'>
 			<div className='flex-1 flex flex-col items-center justify-start'>
-				<h1 className='text-3xl font-bold mb-5 text-gray-800'>Phân tích màu đất qua Webcam</h1>
+				<h1 className='text-4xl font-extrabold mb-5 text-transparent bg-clip-text bg-gradient-to-r from-[#FFDEE9] via-[#B5FFFC] to-[#7BF1A8] animate-gradient'>
+					Phân tích màu đất qua Webcam
+				</h1>
 				{isWebcamOn ? (
 					<>
 						<Webcam
 							audio={false}
 							ref={webcamRef}
 							screenshotFormat='image/jpeg'
-							className='w-full max-w-[640px] h-auto border-2 border-gray-700 rounded-lg'
+							className='w-full max-w-[640px] h-auto border-[3px] border-transparent rounded-3xl shadow-xl bg-gradient-to-r from-[#FFDEE9] via-[#B5FFFC] to-[#7BF1A8] p-2'
 							videoConstraints={{
 								width: 1280,
 								height: 720,
@@ -121,12 +123,12 @@ export default function Home() {
 						<div className='mt-5 flex gap-3'>
 							<button
 								onClick={toggleWebcam}
-								className='px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition'>
+								className='px-6 py-3 bg-gradient-to-r from-[#FF5F6D] to-[#FFC371] text-white rounded-lg hover:scale-105 transition shadow-md hover:shadow-lg'>
 								Tắt Webcam
 							</button>
 							<button
 								onClick={capture}
-								className='px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition'>
+								className='px-6 py-3 bg-gradient-to-r from-[#1E3A8A] to-[#9333EA] text-white rounded-lg hover:scale-105 transition shadow-md hover:shadow-lg'>
 								Chụp Ảnh
 							</button>
 						</div>
@@ -134,23 +136,25 @@ export default function Home() {
 				) : (
 					<button
 						onClick={toggleWebcam}
-						className='px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition'>
+						className='px-6 py-3 bg-gradient-to-r from-[#34D399] to-[#3B82F6] text-white rounded-lg hover:scale-105 transition shadow-md hover:shadow-lg'>
 						Bật Webcam
 					</button>
 				)}
 			</div>
 
 			<div className='flex-1 flex flex-col items-center justify-start'>
-				<h2 className='text-2xl font-semibold mb-5 text-gray-800'>Kết quả</h2>
+				<h2 className='text-3xl font-semibold mb-5 text-transparent bg-clip-text bg-gradient-to-r from-[#FFB800] via-[#FF7C00] to-[#FF4E00] animate-gradient'>
+					Kết quả
+				</h2>
 				{capturedImage ? (
 					<div className='text-center'>
 						<img
 							src={capturedImage}
 							alt='Captured'
-							className='w-full max-w-[640px] h-auto border-2 border-gray-700 rounded-lg mb-5'
+							className='w-full max-w-[640px] h-auto border-[3px] border-transparent rounded-3xl shadow-xl mb-5 bg-gradient-to-r from-[#FFC3A0] to-[#FFAFBD] p-2'
 						/>
 						<p className='text-lg'>
-							Loại đất: <span className='font-bold text-blue-600'>{colorResult}</span>
+							Loại đất: <span className='font-bold text-[#FFE066]'>{colorResult}</span>
 						</p>
 						{rgbValues && (
 							<p className='text-lg'>
@@ -159,7 +163,7 @@ export default function Home() {
 						)}
 					</div>
 				) : (
-					<p className='text-gray-600'>Chưa có ảnh để phân tích.</p>
+					<p className='text-gray-300'>Chưa có ảnh để phân tích.</p>
 				)}
 				<canvas ref={canvasRef} className='hidden' />
 			</div>
