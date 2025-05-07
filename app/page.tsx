@@ -1,16 +1,37 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { getRecommendedPlant } from "@/const";
+import { useState, useRef, useCallback, useEffect } from "react";
 import Webcam from "react-webcam";
 
 export default function Home() {
+	const [info, setInfo] = useState({
+		temperature: 0,
+		humidity: 0,
+		ph: 0,
+	});
 	const webcamRef = useRef<any>(null);
 	const canvasRef = useRef<any>(null);
 	const [isWebcamOn, setIsWebcamOn] = useState(false);
 	const [capturedImage, setCapturedImage] = useState<any>(null);
 	const [colorResult, setColorResult] = useState("");
 	const [rgbValues, setRgbValues] = useState<any>(null);
+	useEffect(() => {
+		const fetchEnvironmentData = async () => {
+			try {
+				const res = await fetch("/api/get");
+				const data = await res.json();
+				console.log("data", data[0]);
+				setInfo(data[0]);
+			} catch (error) {
+				console.error("Failed to fetch environment data:", error);
+			}
+		};
 
+		setInterval(() => {
+			fetchEnvironmentData();
+		}, 2000);
+	}, []);
 	// Toggle webcam
 	const toggleWebcam = () => {
 		setIsWebcamOn((prev) => !prev);
@@ -100,7 +121,6 @@ export default function Home() {
 		};
 	};
 
-
 	return (
 		<div className='flex h-screen p-5 gap-5 bg-gradient-to-br from-[#1E3A8A] via-[#9333EA] to-[#FF5F6D] text-white'>
 			<div className='flex-1 flex flex-col items-center justify-start'>
@@ -166,6 +186,24 @@ export default function Home() {
 					<p className='text-gray-300'>Chưa có ảnh để phân tích.</p>
 				)}
 				<canvas ref={canvasRef} className='hidden' />
+			</div>
+			<div className='bg-white h-fit p-4 text-black absolute bottom-2 right-2  rounded-3xl'>
+				<p className='text-lg font-semibold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-[#FFB800] via-[#FF7C00] to-[#FF4E00] animate-gradient'>
+					Thông số môi trường
+				</p>
+				<ul className='list-disc px-4 font-bold'>
+					<li>Nhiệt độ: {info.temperature}</li>
+					<li>Độ ẩm: {info.humidity}</li>
+					<li>PH: {info.ph}</li>
+				</ul>
+
+				<div className='text-lg'>
+					<span className='font-semibold text-transparent bg-clip-text bg-gradient-to-r from-[#FFB800] via-[#FF7C00] to-[#FF4E00] animate-gradient'>Đề xuất loại cây</span>
+					<p>
+						Loại cây trồng phù hợp:{" "}
+						<span className='font-bold'>{getRecommendedPlant(info, colorResult)}</span>
+					</p>
+				</div>
 			</div>
 		</div>
 	);
