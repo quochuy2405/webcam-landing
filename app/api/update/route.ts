@@ -1,23 +1,29 @@
-import openDb from "@/db";
+import fs from "fs";
+import path from "path";
+
+const dataFilePath = path.join(process.cwd(), "data.json");
+
+// Hàm đọc dữ liệu từ file JSON
+function readData() {
+	const data = fs.readFileSync(dataFilePath, "utf8");
+	return JSON.parse(data);
+}
+
+// Hàm ghi dữ liệu vào file JSON
+function writeData(data: any) {
+	fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2), "utf8");
+}
 
 export async function POST(req: Request) {
 	try {
-		const body = await req.json(); // Parse dữ liệu JSON từ body
+		const body = await req.json();
 		const { temperature, humidity, ph } = body;
-
-		const db = await openDb(); // Kết nối database
-
-		// Thêm hoặc cập nhật dữ liệu
-		const query = `
-			INSERT INTO environment_data (id, temperature, humidity, ph)
-			VALUES (1, ?, ?, ?)
-			ON CONFLICT(id) DO UPDATE SET
-				temperature = excluded.temperature,
-				humidity = excluded.humidity,
-				ph = excluded.ph;
-		`;
-
-		await db.run(query, [temperature, humidity, ph]);
+		writeData({
+			id: 1,
+			temperature,
+			humidity,
+			ph,
+		});
 
 		return new Response(JSON.stringify({ success: true, message: "Data upserted successfully" }), {
 			status: 200,
@@ -25,7 +31,7 @@ export async function POST(req: Request) {
 		});
 	} catch (error) {
 		console.error("Error in API:", error);
-		return new Response(JSON.stringify({ success: false, error: "Database error" }), {
+		return new Response(JSON.stringify({ success: false, error: "File read/write error" }), {
 			status: 500,
 			headers: { "Content-Type": "application/json" },
 		});

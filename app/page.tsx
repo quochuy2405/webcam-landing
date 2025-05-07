@@ -21,8 +21,7 @@ export default function Home() {
 			try {
 				const res = await fetch("/api/get");
 				const data = await res.json();
-				console.log("data", data[0]);
-				setInfo(data[0]);
+				setInfo(data);
 			} catch (error) {
 				console.error("Failed to fetch environment data:", error);
 			}

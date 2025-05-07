@@ -1,18 +1,27 @@
-import openDb from "@/db";
+import fs from "fs";
+import path from "path";
 
-// Lấy danh sách dữ liệu
+const dataFilePath = path.join(process.cwd(), "data.json");
+
+// Hàm đọc dữ liệu từ file JSON
+function readData() {
+	const data = fs.readFileSync(dataFilePath, "utf8");
+	return JSON.parse(data);
+}
+
 export async function GET() {
 	try {
-		const db = await openDb();
-		const rows = await db.all("SELECT * FROM environment_data");
+		// Đọc dữ liệu từ file JSON
+		const data = readData();
 
-		return new Response(JSON.stringify(rows), {
+		// Trả về dữ liệu dưới dạng JSON
+		return new Response(JSON.stringify(data), {
 			status: 200,
 			headers: { "Content-Type": "application/json" },
 		});
 	} catch (error) {
 		console.error("Error in GET API:", error);
-		return new Response(JSON.stringify({ success: false, error: "Database error" }), {
+		return new Response(JSON.stringify({ success: false, error: "File read error" }), {
 			status: 500,
 			headers: { "Content-Type": "application/json" },
 		});
