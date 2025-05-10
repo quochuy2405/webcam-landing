@@ -195,13 +195,15 @@ export default function Home() {
 					<li>Nhiệt độ: {info.temperature}</li>
 					<li>Độ ẩm: {info.humidity}</li>
 					<li>PH: {info.ph}</li>
-				</ul>
+        </ul>
+        {getRecommendedPlant(info, colorResult).image && 	<img src={getRecommendedPlant(info, colorResult).image} alt='Cây trồng phù hợp' className='w-[100px] h-[100px] absolute top-10 right-4 rounded-3xl' />}
+			
 
 				<div className='text-lg'>
 					<span className='font-semibold text-transparent bg-clip-text bg-gradient-to-r from-[#FFB800] via-[#FF7C00] to-[#FF4E00] animate-gradient'>Đề xuất loại cây</span>
 					<p>
 						Loại cây trồng phù hợp:{" "}
-						<span className='font-bold'>{getRecommendedPlant(info, colorResult)}</span>
+						<span className='font-bold'>{getRecommendedPlant(info, colorResult).name}</span>
 					</p>
 				</div>
 			</div>
