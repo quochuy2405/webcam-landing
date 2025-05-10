@@ -20,8 +20,9 @@ export default function Home() {
 		const fetchEnvironmentData = async () => {
 			try {
 				const res = await fetch("/api/get");
-				const data = await res.json();
-				setInfo(data);
+        const data = await res.json();
+        console.log('data', data)
+				setInfo(data.data);
 			} catch (error) {
 				console.error("Failed to fetch environment data:", error);
 			}
