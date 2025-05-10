@@ -5,6 +5,11 @@ const dataFilePath = path.join(process.cwd(), "data.json");
 
 // Hàm đọc dữ liệu từ file JSON
 function readData() {
+	if (!fs.existsSync(dataFilePath)) {
+		// Initialize with empty data if file doesn't exist
+		writeData({ id: 1, temperature: 0, humidity: 0, ph: 0 });
+		return { id: 1, temperature: 0, humidity: 0, ph: 0 };
+	}
 	const data = fs.readFileSync(dataFilePath, "utf8");
 	return JSON.parse(data);
 }
