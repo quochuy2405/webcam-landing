@@ -3,7 +3,7 @@
 import { getRecommendedPlant } from "@/const";
 import { useState, useRef, useCallback, useEffect } from "react";
 import Webcam from "react-webcam";
-import * as XLSX from "xlsx";
+import * as XLSX from 'xlsx';
 
 export default function Home() {
 	const [info, setInfo] = useState({
@@ -17,32 +17,32 @@ export default function Home() {
 	const [capturedImage, setCapturedImage] = useState<any>(null);
 	const [colorResult, setColorResult] = useState("");
 	const [rgbValues, setRgbValues] = useState<any>(null);
-	const [environmentData, setEnvironmentData] = useState<any[]>([]);
-
+    const [environmentData, setEnvironmentData] = useState<any[]>([]);
+    
 	useEffect(() => {
 		const fetchEnvironmentData = async () => {
 			try {
 				const res = await fetch("/api/get");
-				const data = await res.json();
-				console.log("data", data);
+                const data = await res.json();
+                console.log('data', data)
 				setInfo(data.data);
-
-				// Add timestamp to environment data for Excel export
-				const timestamp = new Date().toLocaleString();
-				setEnvironmentData((prevData) => [
-					...prevData,
-					{
-						timestamp,
-						temperature: data.data.temperature,
-						humidity: data.data.humidity,
-						ph: data.data.ph,
-					},
-				]);
-
-				// Keep only the latest 100 records to prevent memory issues
-				if (environmentData.length > 100) {
-					setEnvironmentData((prevData) => prevData.slice(-100));
-				}
+                
+                // Add timestamp to environment data for Excel export
+                const timestamp = new Date().toLocaleString();
+                setEnvironmentData(prevData => [
+                    ...prevData, 
+                    {
+                        timestamp,
+                        temperature: data.data.temperature,
+                        humidity: data.data.humidity,
+                        ph: data.data.ph,
+                    }
+                ]);
+                
+                // Keep only the latest 100 records to prevent memory issues
+                if (environmentData.length > 100) {
+                    setEnvironmentData(prevData => prevData.slice(-100));
+                }
 			} catch (error) {
 				console.error("Failed to fetch environment data:", error);
 			}
@@ -51,10 +51,10 @@ export default function Home() {
 		const interval = setInterval(() => {
 			fetchEnvironmentData();
 		}, 2000);
-
-		return () => clearInterval(interval);
+        
+        return () => clearInterval(interval);
 	}, [environmentData.length]);
-
+    
 	// Toggle webcam
 	const toggleWebcam = () => {
 		setIsWebcamOn((prev) => !prev);
@@ -143,47 +143,47 @@ export default function Home() {
 			setColorResult(soilType);
 		};
 	};
-
-	// Export environment data to Excel
-	const exportToExcel = () => {
-		// Create a new workbook
-		const wb = XLSX.utils.book_new();
-
-		// Create data array with current values
-		const currentData = [
-			{
-				timestamp: new Date().toLocaleString(),
-				temperature: info.temperature,
-				humidity: info.humidity,
-				ph: info.ph,
-				soilType: colorResult || "Chưa xác định",
-			},
-		];
-
-		// Use environmentData history if available, otherwise use current data
-		const dataToExport = environmentData.length > 0 ? environmentData : currentData;
-
-		// Create worksheet with environment data
-		const ws = XLSX.utils.json_to_sheet(dataToExport);
-
-		// Add column headers
-		XLSX.utils.sheet_add_aoa(ws, [["Thời gian", "Nhiệt độ", "Độ ẩm (%)", "pH"]], { origin: "A1" });
-
-		// Set column widths
-		ws["!cols"] = [
-			{ wch: 20 }, // timestamp
-			{ wch: 10 }, // temperature
-			{ wch: 10 }, // humidity
-			{ wch: 10 }, // ph
-		];
-
-		// Add worksheet to workbook
-		XLSX.utils.book_append_sheet(wb, ws, "Thông số môi trường");
-
-		// Generate Excel file and trigger download
-		const fileName = `ThongSoMoiTruong_${new Date().toLocaleDateString().replace(/\//g, "-")}.xlsx`;
-		XLSX.writeFile(wb, fileName);
-	};
+    
+    // Export environment data to Excel
+    const exportToExcel = () => {
+        // Create a new workbook
+        const wb = XLSX.utils.book_new();
+        
+        // Create data array with current values
+        const currentData = [
+            {
+                timestamp: new Date().toLocaleString(),
+                temperature: info.temperature,
+                humidity: info.humidity,
+                ph: info.ph,
+                soilType: colorResult || "Chưa xác định"
+            }
+        ];
+        
+        // Use environmentData history if available, otherwise use current data
+        const dataToExport = environmentData.length > 0 ? environmentData : currentData;
+        
+        // Create worksheet with environment data
+        const ws = XLSX.utils.json_to_sheet(dataToExport);
+        
+        // Add column headers
+        XLSX.utils.sheet_add_aoa(ws, [["Thời gian", "Nhiệt độ", "Độ ẩm (%)", "pH"]], { origin: "A1" });
+        
+        // Set column widths
+        ws["!cols"] = [
+            { wch: 20 }, // timestamp
+            { wch: 10 }, // temperature
+            { wch: 10 }, // humidity
+            { wch: 10 }, // ph
+        ];
+        
+        // Add worksheet to workbook
+        XLSX.utils.book_append_sheet(wb, ws, "Thông số môi trường");
+        
+        // Generate Excel file and trigger download
+        const fileName = `ThongSoMoiTruong_${new Date().toLocaleDateString().replace(/\//g, '-')}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+    };
 
 	return (
 		<div className='flex h-screen p-5 gap-5 bg-gradient-to-br from-[#1E3A8A] via-[#9333EA] to-[#FF5F6D] text-white'>
@@ -253,32 +253,24 @@ export default function Home() {
 			</div>
 			<div className='bg-white h-fit p-4 text-black absolute bottom-2 right-2 rounded-3xl'>
 				<div className='flex justify-between items-start'>
-					<p className='text-lg font-semibold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-[#FFB800] via-[#FF7C00] to-[#FF4E00] animate-gradient'>
-						Thông số môi trường
-					</p>
-					<button
-						onClick={exportToExcel}
-						className='px-3 py-1 text-sm bg-gradient-to-r from-[#10B981] to-[#059669] text-white rounded-lg hover:scale-105 transition shadow-md hover:shadow-lg ml-2'>
-						Export Excel
-					</button>
-				</div>
+                    <p className='text-lg font-semibold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-[#FFB800] via-[#FF7C00] to-[#FF4E00] animate-gradient'>
+                        Thông số môi trường
+                    </p>
+                    <button
+                        onClick={exportToExcel}
+                        className='px-3 py-1 text-sm bg-gradient-to-r from-[#10B981] to-[#059669] text-white rounded-lg hover:scale-105 transition shadow-md hover:shadow-lg ml-2'>
+                        Export Excel
+                    </button>
+                </div>
 				<ul className='list-disc px-4 font-bold'>
 					<li>Nhiệt độ: {info.temperature}</li>
 					<li>Độ ẩm: {info.humidity}%</li>
 					<li>PH: {info.ph}</li>
-				</ul>
-				{getRecommendedPlant(info, colorResult).image && (
-					<img
-						src={getRecommendedPlant(info, colorResult).image}
-						alt='Cây trồng phù hợp'
-						className='w-[100px] h-[100px] absolute top-10 right-4 rounded-3xl'
-					/>
-				)}
-
+                </ul>
+                {getRecommendedPlant(info, colorResult).image && <img src={getRecommendedPlant(info, colorResult).image} alt='Cây trồng phù hợp' className='w-[100px] h-[100px] absolute top-10 right-4 rounded-3xl' />}
+			
 				<div className='text-lg'>
-					<span className='font-semibold text-transparent bg-clip-text bg-gradient-to-r from-[#FFB800] via-[#FF7C00] to-[#FF4E00] animate-gradient'>
-						Đề xuất loại cây
-					</span>
+					<span className='font-semibold text-transparent bg-clip-text bg-gradient-to-r from-[#FFB800] via-[#FF7C00] to-[#FF4E00] animate-gradient'>Đề xuất loại cây</span>
 					<p>
 						Loại cây trồng phù hợp:{" "}
 						<span className='font-bold'>{getRecommendedPlant(info, colorResult).name}</span>
