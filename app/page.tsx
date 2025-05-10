@@ -193,7 +193,7 @@ export default function Home() {
 				</p>
 				<ul className='list-disc px-4 font-bold'>
 					<li>Nhiệt độ: {info.temperature}</li>
-					<li>Độ ẩm: {info.humidity}</li>
+					<li>Độ ẩm: {info.humidity}%</li>
 					<li>PH: {info.ph}</li>
         </ul>
         {getRecommendedPlant(info, colorResult).image && 	<img src={getRecommendedPlant(info, colorResult).image} alt='Cây trồng phù hợp' className='w-[100px] h-[100px] absolute top-10 right-4 rounded-3xl' />}
