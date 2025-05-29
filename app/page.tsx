@@ -111,33 +111,38 @@ export default function Home() {
 			// Improved soil color classification
 			let soilType = "Không xác định";
 
+			// Calculate relative color strengths and ratios
+			const totalColor = avgR + avgG + avgB;
+			const redRatio = avgR / totalColor;
+			const greenRatio = avgG / totalColor;
+			const blueRatio = avgB / totalColor;
+			
 			// Calculate value (lightness) and chroma
 			const value = Math.max(avgR, avgG, avgB) / 2.55; // Normalized to 0-100 scale
-			const chroma = Math.sqrt((avgR - avgG) ** 2 + (avgG - avgB) ** 2);
+			const chroma = Math.sqrt((avgR - avgG) ** 2 + (avgG - avgB) ** 2 + (avgR - avgB) ** 2);
 
-			// Soil color classification
-			if (value < 30) {
+			// Improved soil color classification
+			if (value < 25) {
+				// Very dark soils
 				soilType = "Đất đen";
-			} else if (value < 50) {
-				if (avgR > avgG && avgR > avgB) {
-					soilType = chroma > 20 ? "Đất đỏ" : "Đất đen";
-				} else {
-					soilType = "Đất đen";
-				}
-			} else if (value < 70) {
-				if (avgR > avgG && avgR > avgB) {
-					soilType = "Đất đỏ";
-				} else if (avgG > avgR && avgG > avgB) {
-					soilType = "Đất vàng";
-				} else {
-					soilType = "Đất cát";
-				}
+			} else if (avgR > avgG + 15 && avgR > avgB + 15 && redRatio > 0.4) {
+				// Strong red dominance indicates red soil
+				soilType = "Đất đỏ";
+			} else if (value < 45 && chroma < 30) {
+				// Dark soils with low chroma
+				soilType = "Đất đen";
+			} else if (value > 75 || (avgR > 180 && avgG > 160 && avgB > 140)) {
+				// Light colored soils - sandy soil
+				soilType = "Đất cát";
+			} else if (avgR > avgG && avgR > avgB && avgR - avgG > 10) {
+				// Moderate red dominance
+				soilType = "Đất đỏ";
+			} else if (value < 55) {
+				// Medium dark soils
+				soilType = "Đất đen";
 			} else {
-				if (avgR > 200 && avgG > 200 && avgB > 200) {
-					soilType = "Đất cát";
-				} else {
-					soilType = "Đất cát";
-				}
+				// Default to sandy soil for lighter soils
+				soilType = "Đất cát";
 			}
 
 			setColorResult(soilType);
@@ -276,6 +281,12 @@ export default function Home() {
 							</p>
 							{colorResult && (
 								<p className='text-sm mb-4 text-gray-200'>Đặc điểm: {soilCharacteristics}</p>
+							)}
+							{/* Debug RGB Values */}
+							{rgbValues && (
+								<p className='text-xs mb-2 text-yellow-300'>
+									RGB: ({rgbValues.r}, {rgbValues.g}, {rgbValues.b})
+								</p>
 							)}
 						</div>
 					) : (
