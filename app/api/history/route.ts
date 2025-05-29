@@ -11,12 +11,17 @@ export async function POST(req: Request) {
 		// Parse request body
 		const body = await req.json();
 
-		// Validate required fields
-		const { treeType, soilType, temperature, humidity, pH } = body;
+		// Validate required fields (removed temperature)
+		const { treeType, soilType, humidity, ph } = body;
 
-
-		// Save to the database
-		const history = new History({ treeType, soilType, temperature, humidity, pH });
+		// Save to the database (temperature will be undefined/null for new records)
+		const history = new History({ 
+			treeType, 
+			soilType, 
+			temperature: null, // Set as null for new records since we're no longer tracking temperature
+			humidity, 
+			ph 
+		});
 		await history.save();
 		console.log("history", history);
 		// Respond with the created document
