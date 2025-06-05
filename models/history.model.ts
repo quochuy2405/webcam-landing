@@ -16,6 +16,8 @@ const historySchema = new mongoose.Schema({
 	ph: {
 		type: Number, // Assuming pH is a number
 	},
+}, {
+	timestamps: true // This will automatically add createdAt and updatedAt fields
 });
 
 const History = models.History || model("History", historySchema);

@@ -9,6 +9,7 @@ export default function Home() {
 	const [info, setInfo] = useState({
 		humidity: 0,
 		ph: 0,
+		temperature: 0,
 	});
 	const webcamRef = useRef<any>(null);
 	const canvasRef = useRef<any>(null);
@@ -26,6 +27,7 @@ export default function Home() {
 				setInfo({
 					humidity: data.data.humidity,
 					ph: data.data.ph,
+					temperature: data.data.temperature,
 				});
 
 				// Add timestamp to environment data for Excel export
@@ -36,6 +38,7 @@ export default function Home() {
 						timestamp,
 						humidity: data.data.humidity,
 						ph: data.data.ph,
+						temperature: data.data.temperature,
 					},
 				]);
 
@@ -162,11 +165,12 @@ export default function Home() {
 			// Create a new workbook
 			const wb = XLSX.utils.book_new();
 
-			// Map and format data (removed temperature)
+			// Map and format data
 			const data = historyData.data.map((i: any) => ({
-				Thời_gian: i.createdAt, // Format timestamp
+				Thời_gian: i.createdAt ? new Date(i.createdAt).toLocaleString('vi-VN') : "N/A", // Format timestamp properly
+				Nhiệt_độ: i.temperature || "N/A",
 				Độ_ẩm: i.humidity || "N/A",
-				pH: i.pH || "N/A",
+				pH: i.ph || "N/A", // Fixed case from i.pH to i.ph
 				Loại_đất: i.soilType || "N/A",
 				Loại_cây_trồng: i.treeType || "N/A",
 			}));
@@ -174,16 +178,17 @@ export default function Home() {
 			// Create worksheet
 			const ws = XLSX.utils.json_to_sheet(data);
 
-			// Add column headers (removed temperature)
+			// Add column headers
 			XLSX.utils.sheet_add_aoa(
 				ws,
-				[["Thời gian", "Độ ẩm (%)", "pH", "Loại đất", "Loại cây trồng"]],
+				[["Thời gian", "Nhiệt độ (°C)", "Độ ẩm (%)", "pH", "Loại đất", "Loại cây trồng"]],
 				{ origin: "A1" }
 			);
 
-			// Set column widths (removed temperature)
+			// Set column widths
 			ws["!cols"] = [
 				{ wch: 20 }, // timestamp
+				{ wch: 12 }, // temperature
 				{ wch: 10 }, // humidity
 				{ wch: 10 }, // ph
 				{ wch: 15 }, // soil type
@@ -211,6 +216,7 @@ export default function Home() {
 				body: JSON.stringify({
 					humidity: info.humidity,
 					ph: info.ph,
+					temperature: info.temperature || null, // Include temperature if available
 					soilType: colorResult,
 					treeType: getRecommendedPlant(info, colorResult).name,
 				}),
@@ -340,6 +346,7 @@ export default function Home() {
 							</button>
 						</div>
 						<ul className='list-disc px-4 font-bold mb-4'>
+							<li>Nhiệt độ: {info.temperature}°C</li>
 							<li>Độ ẩm: {info.humidity}%</li>
 							<li>PH: {info.ph}</li>
 						</ul>
